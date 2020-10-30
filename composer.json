@@ -1,0 +1,26 @@
+{
+    "name": "taranovegor/turbosms-notifier",
+    "description": "Provides TurboSMS integration for Symfony Notifier.",
+    "type": "symfony-bridge",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Egor Taranov",
+            "email": "dev@taranovegor.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=7.2.5",
+        "symfony/http-client": "^4.3|^5.0",
+        "symfony/notifier": "^5.1"
+    },
+    "require-dev": {
+        "symfony/event-dispatcher": "^4.3|^5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "taranovegor\\TurboSmsNotifier\\": ""
+        }
+    }
+}
