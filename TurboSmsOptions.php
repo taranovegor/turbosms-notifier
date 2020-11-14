@@ -17,6 +17,7 @@ use taranovegor\TurboSmsNotifier\MessageOptions\ViberMessageOptions;
  */
 final class TurboSmsOptions implements MessageOptionsInterface
 {
+    public const OPTION_RECIPIENTS = 'recipients';
     public const OPTION_START_TIME = 'start_time';
     public const OPTION_SMS = 'sms';
     public const OPTION_VIBER = 'viber';
@@ -37,7 +38,7 @@ final class TurboSmsOptions implements MessageOptionsInterface
      */
     public function startTime(\DateTime $dateTime): self
     {
-        if ($dateTime < new \DateTime('-15 days')) {
+        if ($dateTime->diff(new \DateTime())->d > 14) {
             throw new InvalidArgumentException('It is permissible to indicate a date not exceeding 14 days from the current moment');
         }
 
@@ -53,7 +54,7 @@ final class TurboSmsOptions implements MessageOptionsInterface
      */
     public function sms(SmsMessageOptions $smsOptions): TurboSmsOptions
     {
-        $this->options[self::OPTION_SMS] = $smsOptions;
+        $this->options[self::OPTION_SMS] = $smsOptions->toArray();
 
         return $this;
     }
@@ -65,7 +66,7 @@ final class TurboSmsOptions implements MessageOptionsInterface
      */
     public function viber(ViberMessageOptions $viberOptions): TurboSmsOptions
     {
-        $this->options[self::OPTION_VIBER] = $viberOptions;
+        $this->options[self::OPTION_VIBER] = $viberOptions->toArray();
 
         return $this;
     }

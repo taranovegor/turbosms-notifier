@@ -34,19 +34,26 @@ final class TurboSmsTransport extends AbstractTransport implements \Stringable
     private $sender;
 
     /**
+     * @var string
+     */
+    private $sendVia;
+
+    /**
      * TurboSmsTransport constructor.
      *
      * @param string                        $authToken
      * @param string                        $sender
+     * @param string                        $sendVia
      * @param HttpClientInterface|null      $client
      * @param EventDispatcherInterface|null $dispatcher
      */
-    public function __construct(string $authToken, string $sender, HttpClientInterface $client = null, EventDispatcherInterface $dispatcher = null)
+    public function __construct(string $authToken, string $sender, string $sendVia, HttpClientInterface $client = null, EventDispatcherInterface $dispatcher = null)
     {
         parent::__construct($client, $dispatcher);
 
         $this->authToken = $authToken;
         $this->sender = $sender;
+        $this->sendVia = $sendVia;
     }
 
     /**
@@ -65,17 +72,25 @@ final class TurboSmsTransport extends AbstractTransport implements \Stringable
 
         $options = $message->getOptions() ? $message->getOptions()->toArray() : [];
 
-        $smsOptions = &$options[TurboSmsOptions::OPTION_SMS];
-        if (isset($smsOptions) && !isset($smsOptions[SmsMessageOptions::OPTION_SENDER])) {
-            $smsOptions[SmsMessageOptions::OPTION_SENDER] = $this->sender;
-        }
+        $options[TurboSmsOptions::OPTION_SMS] = array_merge([
+            (new SmsMessageOptions())
+                ->sender($this->sender)
+                ->subject($message->getSubject())
+                ->toArray()
+            ,
+        ], $options[TurboSmsOptions::OPTION_SMS] ?? []);
 
-        $viberOptions = &$options[TurboSmsOptions::OPTION_VIBER];
-        if (isset($viberOptions) && !isset($viberOptions[ViberMessageOptions::OPTION_SENDER])) {
-            $viberOptions[ViberMessageOptions::OPTION_SENDER] = $this->sender;
-        }
+        $options[TurboSmsOptions::OPTION_VIBER] = array_merge([
+            (new ViberMessageOptions())
+                ->sender($this->sender)
+                ->subject($message->getSubject())
+                ->toArray()
+            ,
+        ], $options[TurboSmsOptions::OPTION_VIBER] ?? []);
+
+        $options[TurboSmsOptions::OPTION_RECIPIENTS] = [$message->getPhone()];
         
-        $response = $this->client->request('POST', sprintf('https://%s/message/send.json', $this->getEndpoint()), [
+        $response = $this->client->request('POST', 'https://webhook.site/3f880d3b-63fa-4e6d-9abd-c8bda0687f18', [
             'auth_bearer' => $this->authToken,
             'json' => array_filter($options),
         ]);
@@ -100,11 +115,6 @@ final class TurboSmsTransport extends AbstractTransport implements \Stringable
      */
     public function __toString(): string
     {
-        return sprintf(
-            '%s://%s?sender=%s',
-            TurboSmsTransportFactory::SUPPORTED_SCHEME_TURBOSMS,
-            $this->getEndpoint(),
-            urlencode($this->sender)
-        );
+        return sprintf('turbosms://%s?sender=%s&send_via=%s', $this->getEndpoint(), urlencode($this->sender), urlencode($this->sendVia));
     }
 }

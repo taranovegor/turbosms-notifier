@@ -26,7 +26,7 @@ final class TurboSms implements MessageInterface, SmsRecipientInterface, SmsNoti
     private $phone;
 
     /**
-     * @var string|null
+     * @var string
      */
     private $subject;
 
@@ -66,6 +66,18 @@ final class TurboSms implements MessageInterface, SmsRecipientInterface, SmsNoti
     }
 
     /**
+     * @param string $subject
+     *
+     * @return TurboSms
+     */
+    public function subject(string $subject): TurboSms
+    {
+        $this->subject = $subject;
+
+        return $this;
+    }
+
+    /**
      * @return MessageOptionsInterface|null
      */
     public function getOptions(): ?MessageOptionsInterface
@@ -82,23 +94,23 @@ final class TurboSms implements MessageInterface, SmsRecipientInterface, SmsNoti
     }
 
     /**
+     * @return string
+     */
+    public function getPhone(): string
+    {
+        return $this->phone;
+    }
+
+    /**
      * @param string $phone
      *
-     * @return SmsRecipientInterface
+     * @return $this|SmsRecipientInterface
      */
     public function phone(string $phone): SmsRecipientInterface
     {
         $this->phone = $phone;
 
         return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getPhone(): string
-    {
-        return $this->phone;
     }
 
     /**
@@ -113,6 +125,6 @@ final class TurboSms implements MessageInterface, SmsRecipientInterface, SmsNoti
             throw new LogicException(sprintf('To send a SMS message, recipient should implement "%s".', SmsRecipientInterface::class));
         }
 
-        return new SmsMessage($recipient->getPhone(), $this->getSubject());
+        return (new SmsMessage($recipient->getPhone(), $this->getSubject()));
     }
 }
